@@ -56,7 +56,7 @@ class Preprocess(object):
                 if not word:
                     continue
                 self.vocab.append(word)
-        self.word2idx = {word: idx for idx, word in self.vocab}
+        self.word2idx = {word: idx for idx, word in enumerate(self.vocab)}
         self.idx2word = {self.word2idx[word]: word for word in self.vocab}
         pickle.dump(self.vocab, open(os.path.join(self.data_dir, 'vocab.dat'), 'wb'))
         pickle.dump(self.idx2word, open(os.path.join(self.data_dir, 'idx2word.dat'), 'wb'))
