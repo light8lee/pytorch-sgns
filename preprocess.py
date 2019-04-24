@@ -4,6 +4,7 @@ import os
 import codecs
 import pickle
 import argparse
+from collections import defaultdict
 
 
 def parse_args():
@@ -48,16 +49,15 @@ class Preprocess(object):
         # self.idx2word = [self.unk] + sorted(self.wc, key=self.wc.get, reverse=True)[:max_vocab - 1]
         # self.word2idx = {self.idx2word[idx]: idx for idx, _ in enumerate(self.idx2word)}
         # self.vocab = set([word for word in self.word2idx])
-        # pickle.dump(self.wc, open(os.path.join(self.data_dir, 'wc.dat'), 'wb'))
-        self.vocab = []
+        self.idx2word = []
         with codecs.open(filepath, 'r', encoding='utf-8') as f:
             for line in f:
                 word = line.strip()
                 if not word:
                     continue
-                self.vocab.append(word)
-        self.word2idx = {word: idx for idx, word in enumerate(self.vocab)}
-        self.idx2word = {self.word2idx[word]: word for word in self.vocab}
+                self.idx2word.append(word)
+        self.word2idx = {word: idx for idx, word in enumerate(self.idx2word)}
+        self.vocab = set(self.idx2word)
         pickle.dump(self.vocab, open(os.path.join(self.data_dir, 'vocab.dat'), 'wb'))
         pickle.dump(self.idx2word, open(os.path.join(self.data_dir, 'idx2word.dat'), 'wb'))
         pickle.dump(self.word2idx, open(os.path.join(self.data_dir, 'word2idx.dat'), 'wb'))
@@ -67,6 +67,7 @@ class Preprocess(object):
         print("converting corpus...")
         step = 0
         data = []
+        self.wc = defaultdict(int)
         with codecs.open(filepath, 'r', encoding='utf-8') as file:
             for line in file:
                 step += 1
@@ -79,13 +80,16 @@ class Preprocess(object):
                 for word in line.split():
                     if word in self.vocab:
                         sent.append(word)
+                        self.wc[word] += 1
                     else:
                         sent.append(self.unk)
+                        self.wc[self.unk] += 1
                 for i in range(len(sent)):
                     iword, owords = self.skipgram(sent, i)
                     data.append((self.word2idx[iword], [self.word2idx[oword] for oword in owords]))
         print("")
         pickle.dump(data, open(os.path.join(self.data_dir, 'train.dat'), 'wb'))
+        pickle.dump(self.wc, open(os.path.join(self.data_dir, 'wc.dat'), 'wb'))
         print("conversion done")
 
 
