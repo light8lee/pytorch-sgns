@@ -19,7 +19,7 @@ def parse_args():
 
 class Preprocess(object):
 
-    def __init__(self, window=5, unk='<UNK>', data_dir='./data/'):
+    def __init__(self, window=5, unk='[UNK]', data_dir='./data/'):
         self.window = window
         self.unk = unk
         self.data_dir = data_dir
@@ -30,26 +30,35 @@ class Preprocess(object):
         right = sentence[i + 1: i + 1 + self.window]
         return iword, [self.unk for _ in range(self.window - len(left))] + left + right + [self.unk for _ in range(self.window - len(right))]
 
-    def build(self, filepath, max_vocab=20000):
+    def build(self, filepath):
         print("building vocab...")
-        step = 0
-        self.wc = {self.unk: 1}
-        with codecs.open(filepath, 'r', encoding='utf-8') as file:
-            for line in file:
-                step += 1
-                if not step % 1000:
-                    print("working on {}kth line".format(step // 1000), end='\r')
-                line = line.strip()
-                if not line:
+        # step = 0
+        # self.wc = {self.unk: 1}
+        # with codecs.open(filepath, 'r', encoding='utf-8') as file:
+        #     for line in file:
+        #         step += 1
+        #         if not step % 1000:
+        #             print("working on {}kth line".format(step // 1000), end='\r')
+        #         line = line.strip()
+        #         if not line:
+        #             continue
+        #         sent = line.split()
+        #         for word in sent:
+        #             self.wc[word] = self.wc.get(word, 0) + 1
+        # print("")
+        # self.idx2word = [self.unk] + sorted(self.wc, key=self.wc.get, reverse=True)[:max_vocab - 1]
+        # self.word2idx = {self.idx2word[idx]: idx for idx, _ in enumerate(self.idx2word)}
+        # self.vocab = set([word for word in self.word2idx])
+        # pickle.dump(self.wc, open(os.path.join(self.data_dir, 'wc.dat'), 'wb'))
+        self.vocab = []
+        with codecs.open(filepath, 'r', encoding='utf-8') as f:
+            for line in f:
+                word = line.strip()
+                if not word:
                     continue
-                sent = line.split()
-                for word in sent:
-                    self.wc[word] = self.wc.get(word, 0) + 1
-        print("")
-        self.idx2word = [self.unk] + sorted(self.wc, key=self.wc.get, reverse=True)[:max_vocab - 1]
-        self.word2idx = {self.idx2word[idx]: idx for idx, _ in enumerate(self.idx2word)}
-        self.vocab = set([word for word in self.word2idx])
-        pickle.dump(self.wc, open(os.path.join(self.data_dir, 'wc.dat'), 'wb'))
+                self.vocab.append(word)
+        self.word2idx = {word: idx for idx, word in self.vocab}
+        self.idx2word = {self.word2idx[word]: word for word in self.vocab}
         pickle.dump(self.vocab, open(os.path.join(self.data_dir, 'vocab.dat'), 'wb'))
         pickle.dump(self.idx2word, open(os.path.join(self.data_dir, 'idx2word.dat'), 'wb'))
         pickle.dump(self.word2idx, open(os.path.join(self.data_dir, 'word2idx.dat'), 'wb'))
@@ -84,5 +93,5 @@ class Preprocess(object):
 if __name__ == '__main__':
     args = parse_args()
     preprocess = Preprocess(window=args.window, unk=args.unk, data_dir=args.data_dir)
-    preprocess.build(args.vocab, max_vocab=args.max_vocab)
+    preprocess.build(args.vocab)
     preprocess.convert(args.corpus)
