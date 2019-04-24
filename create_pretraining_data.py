@@ -164,9 +164,8 @@ def create_float_feature(values):
   return feature
 
 
-def create_training_instances(input_files, output_files, tokenizer, max_seq_length,
-                              dupe_factor, short_seq_prob, masked_lm_prob,
-                              max_predictions_per_seq, max_document_size, rng):
+def create_training_instances(input_files, output_files, tokenizer, dupe_factor,
+                              max_document_size, rng):
   """Create `TrainingInstance`s from raw text."""
   all_documents = [[]]
 
@@ -226,8 +225,7 @@ def main(_):
 
   rng = random.Random(FLAGS.random_seed)
   create_training_instances(
-      input_files, FLAGS.output_file, tokenizer, FLAGS.max_seq_length, FLAGS.dupe_factor,
-      FLAGS.short_seq_prob, FLAGS.masked_lm_prob, FLAGS.max_predictions_per_seq,
+      input_files, FLAGS.output_file, tokenizer, FLAGS.dupe_factor,
       FLAGS.max_document_size, rng)
 
 
