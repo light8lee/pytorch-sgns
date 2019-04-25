@@ -83,10 +83,10 @@ def train(args):
             loss.backward()
             optim.step()
             pbar.set_postfix(loss=loss.item())
-    idx2vec = model.ivectors.weight.data.cpu().numpy()
-    pickle.dump(idx2vec, open(os.path.join(args.data_dir, 'idx2vec.dat'), 'wb'))
-    t.save(sgns.state_dict(), os.path.join(args.save_dir, '{}.pt'.format(args.name)))
-    t.save(optim.state_dict(), os.path.join(args.save_dir, '{}.optim.pt'.format(args.name)))
+        idx2vec = model.ivectors.weight.data.cpu().numpy()
+        pickle.dump(idx2vec, open(os.path.join(args.data_dir, 'idx2vec.dat'), 'wb'))
+        t.save(sgns.state_dict(), os.path.join(args.save_dir, '{}-epoch{}.pt'.format(args.name, epoch)))
+        t.save(optim.state_dict(), os.path.join(args.save_dir, '{}-epoch{}.optim.pt'.format(args.name, epoch)))
 
 
 if __name__ == '__main__':
