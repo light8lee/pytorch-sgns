@@ -84,7 +84,7 @@ def train(args):
             optim.step()
             pbar.set_postfix(loss=loss.item())
         idx2vec = model.ivectors.weight.data.cpu().numpy()
-        pickle.dump(idx2vec, open(os.path.join(args.data_dir, 'idx2vec-epoch{}.dat'.format(epoch)), 'wb'))
+        pickle.dump(idx2vec, open(os.path.join(args.save_dir, 'idx2vec-epoch{}.dat'.format(epoch)), 'wb'))
         t.save(sgns.state_dict(), os.path.join(args.save_dir, '{}-epoch{}.pt'.format(args.name, epoch)))
         t.save(optim.state_dict(), os.path.join(args.save_dir, '{}-epoch{}.optim.pt'.format(args.name, epoch)))
 
