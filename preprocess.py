@@ -4,6 +4,7 @@ import os
 import codecs
 import pickle
 import argparse
+import six
 from collections import defaultdict
 
 
@@ -15,6 +16,27 @@ def parse_args():
     parser.add_argument('--unk', type=str, default='[UNK]', help="UNK token")
     parser.add_argument('--window', type=int, default=5, help="window size")
     return parser.parse_args()
+
+
+
+def convert_to_unicode(text):
+    """Converts `text` to Unicode (if it's not already), assuming utf-8 input."""
+    if six.PY3:
+        if isinstance(text, str):
+            return text
+        elif isinstance(text, bytes):
+            return text.decode("utf-8", "ignore")
+        else:
+            raise ValueError("Unsupported string type: %s" % (type(text)))
+    elif six.PY2:
+        if isinstance(text, str):
+            return text.decode("utf-8", "ignore")
+        elif isinstance(text, unicode):
+            return text
+        else:
+            raise ValueError("Unsupported string type: %s" % (type(text)))
+    else:
+        raise ValueError("Not running on Python2 or Python 3?")
 
 
 class Preprocess(object):
@@ -52,9 +74,10 @@ class Preprocess(object):
         self.idx2word = []
         with codecs.open(filepath, 'r', encoding='utf-8') as f:
             for line in f:
-                word = line.strip()
+                word = convert_to_unicode(line)
                 if not word:
-                    continue
+                    break
+                word = word.strip()
                 self.idx2word.append(word)
         self.word2idx = {word: idx for idx, word in enumerate(self.idx2word)}
         self.vocab = set(self.idx2word)
